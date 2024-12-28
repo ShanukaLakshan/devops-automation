@@ -1,0 +1,8 @@
+# .dockerignore
+
+# Exclude the Dockerfile and Jenkinsfile
+Dockerfile
+Jenkinsfile
+
+# Do not exclude target/ directory, which contains the JAR file
+!.dockerignore
