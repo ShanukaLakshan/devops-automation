@@ -1,11 +1,7 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE_NAME = 'your-image-name' // Replace with your desired Docker image name
-        DOCKER_TAG = 'latest' // Tag for the image (can use a version number or commit hash)
-    }
-
+    
     stages {
         stage('Checkout') {
             steps {
@@ -35,13 +31,18 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Login to Docker Hub (or any other registry)
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
-                    }
-
+                    // Login to Docker Hub
+                    sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                    
                     // Push the image to the Docker registry
                     sh "docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                }
+            }
+        }
+        stage('Deploy to k8s'){
+            steps{
+                script{
+                    kubernetesDeploy (configs: 'deploymentservice.yaml',kubeconfigId: 'k8sconfigpwd')
                 }
             }
         }
